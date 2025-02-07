@@ -12,6 +12,16 @@ const addCards = (items) => {
     });
 }
 
+function validateFormData(formData) {
+    for (const key in formData) {
+        if (formData[key] === '' || formData[key] === undefined) {
+            console.error(`Validation Error: ${key} is missing or empty`);
+            return false;
+        }
+    }
+    return true;
+}
+
 const formSubmitted = () => {
     let formData = {};
     formData.title = $('#title').val();
@@ -19,27 +29,50 @@ const formSubmitted = () => {
     formData.path = $('#path').val();
     formData.description = $('#description').val();
 
-    console.log(formData);
-    adddog(formData);  // Changed from postdog to adddog
+    if (!validateFormData(formData)) {
+
+    alert('Please fill all fields');
+    } else {
+        adddog(formData);  // Changed from postdog to adddog
+        var instance = M.Modal.getInstance($('#modal1'));
+        instance.close();
+    }
+
 }
 
-function adddog(cat){
+function adddog(cat) {
+    addCards([cat]);
+
     $.ajax({
-        url:'/api/cat',
-        type:'POST',
-        data:cat,
-        success: (result)=>{
+        url: '/api/cat',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(cat),
+        success: (result) => {
+            console.log("POST DOG RESPONSE::::::::::", result);
             if (result.statusCode === 201) {
+      
                 alert('dog post successful');
             }
+        },
+        error: (xhr, status, error) => {
+            console.error("Error posting dog:", status, error);
         }
     });
 }
 
+
+
 function getAlldogs(){
+    console.log("FRONTEND GET ALL CATS");
+    
     $.get('/api/cats', (response)=>{
+        console.log("FRONTEND GET ALL CATS RESPONSE::::::::::", response);
+        
         // response's data is in array format, so we can use it
         if (response.statusCode === 200) {
+            console.log("DATA::::::::::", response.data);
+            
             addCards(response.data);
         }
     });
